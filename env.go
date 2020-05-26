@@ -24,12 +24,16 @@ func (*Env) Delete(string) error {
 }
 
 func (*Env) getFor(varPrefix string) (string, string, error) {
-	username, ok := os.LookupEnv(varPrefix + "_USERNAME")
-	if !ok {
+	publicAccess, havePublicAccess := os.LookupEnv(varPrefix + "_PUBLIC_ACCESS_ONLY")
+	if havePublicAccess && publicAccess == "true" {
+		return "", "", nil
+	}
+	username, haveUsername := os.LookupEnv(varPrefix + "_USERNAME")
+	if !haveUsername {
 		return "", "", fmt.Errorf("%s_USERNAME is not set", varPrefix)
 	}
-	password, ok := os.LookupEnv(varPrefix + "_PASSWORD")
-	if !ok {
+	password, havePassword := os.LookupEnv(varPrefix + "_PASSWORD")
+	if !havePassword {
 		return "", "", fmt.Errorf("%s_USERNAME is not set", varPrefix)
 	}
 	return username, password, nil
