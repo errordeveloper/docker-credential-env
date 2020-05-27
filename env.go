@@ -39,6 +39,11 @@ func (*Env) getFor(varPrefix string) (string, string, error) {
 	return username, password, nil
 }
 
+func (*Env) isThis(serverURL, serverHostname, registryDomain string) bool {
+	return strings.HasSuffix(u.Host, "."+registryDomain) || (u.Host == registryDomain) ||
+		strings.HasSuffix(serverURL, "."+registryDomain) || (serverURL == registryDomain)
+}
+
 // Get returns the username and secret to use for a given registry server URL.
 func (e *Env) Get(serverURL string) (string, string, error) {
 	if serverURL == "" {
@@ -49,10 +54,10 @@ func (e *Env) Get(serverURL string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	if strings.HasSuffix(u.Host, ".docker.io") {
+	if e.isThis(serverURL, u.Host, "docker.io") {
 		return e.getFor("DOCKER_HUB")
 	}
-	if strings.HasSuffix(u.Host, ".quay.io") {
+	if e.isThis(serverURL, u.Host, "quay.io") {
 		return e.getFor("QUAY")
 	}
 	return e.getFor("ANY_REGISTRY")
