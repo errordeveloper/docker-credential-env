@@ -60,6 +60,10 @@ func (e *Env) Get(serverURL string) (string, string, error) {
 	if e.isThis(serverURL, u.Host, "quay.io") {
 		return e.getFor("QUAY")
 	}
+	anyRegistryDisable, haveAnyRegistryDisable := os.LookupEnv("ANY_REGISTRY_DISABLE")
+	if haveAnyRegistryDisable && anyRegistryDisable == "true" {
+		return "", "", fmt.Errorf("unsupported registry: %q", serverURL)
+	}
 	return e.getFor("ANY_REGISTRY")
 }
 
