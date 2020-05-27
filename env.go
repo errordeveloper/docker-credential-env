@@ -40,8 +40,8 @@ func (*Env) getFor(varPrefix string) (string, string, error) {
 }
 
 func (*Env) isThis(serverURL, serverHostname, registryDomain string) bool {
-	return strings.HasSuffix(u.Host, "."+registryDomain) || (u.Host == registryDomain) ||
-		strings.HasSuffix(serverURL, "."+registryDomain) || (serverURL == registryDomain)
+	return strings.HasSuffix(serverURL, "."+registryDomain) || (serverURL == registryDomain) ||
+		strings.HasSuffix(serverHostname, "."+registryDomain) || (serverHostname == registryDomain)
 }
 
 // Get returns the username and secret to use for a given registry server URL.
