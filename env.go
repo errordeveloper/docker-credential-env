@@ -34,7 +34,7 @@ func (*Env) getFor(varPrefix string) (string, string, error) {
 	}
 	password, havePassword := os.LookupEnv(varPrefix + "_PASSWORD")
 	if !havePassword {
-		return "", "", fmt.Errorf("%s_USERNAME is not set", varPrefix)
+		return "", "", fmt.Errorf("%s_PASSWORD is not set", varPrefix)
 	}
 	return username, password, nil
 }
