@@ -44,16 +44,7 @@ func (*Env) isThis(serverURL, serverHostname, registryDomain string) bool {
 		strings.HasSuffix(serverHostname, "."+registryDomain) || (serverHostname == registryDomain)
 }
 
-// Get returns the username and secret to use for a given registry server URL.
-func (e *Env) Get(serverURL string) (string, string, error) {
-	if serverURL == "" {
-		return "", "", errors.New("missing server URL")
-	}
-
-	u, err := url.Parse(serverURL)
-	if err != nil {
-		return "", "", err
-	}
+func (e *Env) getForKnownRegistry(serverURL string, u *url.URL) (string, string, error) {
 	if e.isThis(serverURL, u.Host, "azurecr.com") {
 		return e.getFor("ACR")
 	}
@@ -72,11 +63,31 @@ func (e *Env) Get(serverURL string) (string, string, error) {
 	if e.isThis(serverURL, u.Host, "quay.io") {
 		return e.getFor("QUAY")
 	}
-	anyRegistryDisable, haveAnyRegistryDisable := os.LookupEnv("ANY_REGISTRY_DISABLE")
-	if haveAnyRegistryDisable && anyRegistryDisable == "true" {
-		return "", "", fmt.Errorf("unsupported registry: %q", serverURL)
+	return "", "", fmt.Errorf("unsupported registry %s", serverURL)
+}
+
+// Get returns the username and secret to use for a given registry server URL.
+func (e *Env) Get(serverURL string) (string, string, error) {
+	if serverURL == "" {
+		return "", "", errors.New("missing server URL")
 	}
+
+	u, err := url.Parse(serverURL)
+	if err != nil {
+		return "", "", err
+	}
+
+	username, password, err := e.getForKnownRegistry(serverURL, u)
+	if err == nil {
+		return username, password, nil
+	}
+
+	if os.Getenv("ANY_REGISTRY_DISABLE") == "true" {
+		return "", "", err
+	}
+
 	return e.getFor("ANY_REGISTRY")
+
 }
 
 // List is not supported and will always error.
