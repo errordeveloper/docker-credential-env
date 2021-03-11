@@ -54,8 +54,20 @@ func (e *Env) Get(serverURL string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	if e.isThis(serverURL, u.Host, "azurecr.com") {
+		return e.getFor("ACR")
+	}
 	if e.isThis(serverURL, u.Host, "docker.io") {
 		return e.getFor("DOCKER_HUB")
+	}
+	if e.isThis(serverURL, u.Host, "amazonaws.com") {
+		return e.getFor("ECR")
+	}
+	if e.isThis(serverURL, u.Host, "gcr.io") {
+		return e.getFor("GCR")
+	}
+	if e.isThis(serverURL, u.Host, "ghcr.io") {
+		return e.getFor("GHCR")
 	}
 	if e.isThis(serverURL, u.Host, "quay.io") {
 		return e.getFor("QUAY")
