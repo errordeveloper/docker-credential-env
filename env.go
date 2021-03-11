@@ -28,12 +28,12 @@ func (*Env) getFor(varPrefix string) (string, string, error) {
 	if havePublicAccess && publicAccess == "true" {
 		return "", "", nil
 	}
-	username, haveUsername := os.LookupEnv(varPrefix + "_USERNAME")
-	if !haveUsername {
+	username := os.Getenv(varPrefix + "_USERNAME")
+	if username == "" {
 		return "", "", fmt.Errorf("%s_USERNAME is not set", varPrefix)
 	}
-	password, havePassword := os.LookupEnv(varPrefix + "_PASSWORD")
-	if !havePassword {
+	password := os.Getenv(varPrefix + "_PASSWORD")
+	if password == "" {
 		return "", "", fmt.Errorf("%s_PASSWORD is not set", varPrefix)
 	}
 	return username, password, nil
