@@ -72,21 +72,26 @@ func (e *Env) Get(serverURL string) (string, string, error) {
 		return "", "", errors.New("missing server URL")
 	}
 
-	u, err := url.Parse(serverURL)
+	parsedServerURL, err := url.Parse(serverURL)
 	if err != nil {
 		return "", "", err
 	}
 
-	username, password, err := e.getForKnownRegistry(serverURL, u)
+	username, password, err := e.getForKnownRegistry(serverURL, parsedServerURL)
 	if err == nil {
 		return username, password, nil
 	}
 
-	if os.Getenv("ANY_REGISTRY_DISABLE") == "true" {
+	disableFallback := os.Getenv("ANY_REGISTRY_DISABLE")
+	if disableFallback == "true" {
 		return "", "", err
 	}
 
-	return e.getFor("ANY_REGISTRY")
+	username, password, fallbackErr := e.getFor("ANY_REGISTRY")
+	if fallbackErr != nil {
+		return "", "", fmt.Errorf("failed to get fallback credentials for %s (set ANY_REGISTRY_DISABLE=true to disable fallback): %w", serverURL, fallbackErr)
+	}
+	return username, password, nil
 
 }
 
